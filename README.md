@@ -1,0 +1,75 @@
+# AnnotatePlus
+
+Intelligent Rails model analysis and annotation tool that extends beyond traditional schema annotation to provide intelligent analysis and actionable suggestions for Rails model code quality, performance, and maintainability.
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'annotate_plus', group: :development
+```
+
+And then execute:
+
+    $ bundle install
+
+Or install it yourself as:
+
+    $ gem install annotate_plus
+
+## Usage
+
+### Basic Commands
+
+```bash
+# Analyze all models
+annotate_plus analyze
+
+# Analyze specific model
+annotate_plus analyze User
+
+# Run analysis in interactive mode
+annotate_plus analyze User --interactive
+
+# Save analysis results to file
+annotate_plus analyze --output analysis_report.json
+```
+
+### Configuration
+
+Create a configuration file in your Rails application:
+
+```ruby
+# config/initializers/annotate_plus.rb
+AnnotatePlus.configure do |config|
+  config.analyze_query_logs = true
+  config.suggest_indexes = true
+  config.detect_unused_associations = true
+  config.annotation_position = :top # or :bottom
+  config.exclude_models = ['ActiveRecord::Base']
+  config.min_usage_threshold = 3 # minimum usage count for suggestions
+end
+```
+
+## Features
+
+- **Smart Association Detection**: Identifies missing associations based on foreign keys
+- **Query Pattern Analysis**: Suggests associations based on code usage patterns
+- **Performance Optimization**: Recommends indexes and caching strategies
+- **Dead Code Detection**: Finds unused associations and callbacks
+- **Interactive Mode**: Allows selective application of suggestions
+
+## Development
+
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+## Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/yourusername/annotate_plus.
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
