@@ -3,6 +3,13 @@ require_relative "base_analyzer"
 module AnnotatePlus
   module Analyzers
     class ForeignKeyDetector < BaseAnalyzer
+      # Common integer types that can reference each other
+      INTEGER_TYPES = %w[integer bigint].freeze
+      # UUID types that can reference each other
+      UUID_TYPES = %w[uuid].freeze
+      # String types that might be used for UUIDs
+      STRING_TYPES = %w[string text].freeze
+
       def analyze
         @results = {
           missing_associations: find_missing_associations,
@@ -39,7 +46,7 @@ module AnnotatePlus
       end
 
       def foreign_key_columns
-        columns.select { |col| col.name.end_with?('_id') && col.name != 'id' }
+        columns.select { |col| col.name.end_with?('_id') && col.name != 'id' && valid_foreign_key?(col) }
       end
 
       def has_association_for_column?(column)
@@ -61,6 +68,98 @@ module AnnotatePlus
 
       def table_exists?(table_name)
         ActiveRecord::Base.connection.table_exists?(table_name)
+      end
+
+      def valid_foreign_key?(column)
+        # Check if the column actually references an existing table's primary key
+        referenced_table = infer_table_name(column)
+        
+        # First check if the table exists
+        return false unless table_exists?(referenced_table)
+        
+        # Then check if the referenced table has a primary key that matches the column type
+        begin
+          referenced_model_class = referenced_table.classify.constantize
+          primary_key_column = referenced_model_class.columns.find { |col| col.name == referenced_model_class.primary_key }
+          
+          # Compare column types to ensure they're compatible
+          return false unless primary_key_column
+          
+          # Check if the types are compatible (both should be integer-like for _id columns)
+          compatible_types?(column, primary_key_column)
+        rescue NameError
+          # If we can't find the model class, check if table has an 'id' column
+          check_table_primary_key(referenced_table, column)
+        end
+      end
+
+      private
+
+      def compatible_types?(foreign_key_column, primary_key_column)
+        fk_type = foreign_key_column.type.to_s
+        pk_type = primary_key_column.type.to_s
+        
+        # Check for integer compatibility
+        return true if INTEGER_TYPES.include?(fk_type) && INTEGER_TYPES.include?(pk_type)
+        
+        # Check for UUID compatibility
+        return true if UUID_TYPES.include?(fk_type) && UUID_TYPES.include?(pk_type)
+        
+        # Check for string-based UUID compatibility (common when using string columns for UUIDs)
+        return true if STRING_TYPES.include?(fk_type) && STRING_TYPES.include?(pk_type) && 
+                      likely_uuid_column?(foreign_key_column, primary_key_column)
+        
+        # Cross-compatibility: string foreign key referencing UUID primary key (or vice versa)
+        return true if (STRING_TYPES.include?(fk_type) && UUID_TYPES.include?(pk_type)) ||
+                      (UUID_TYPES.include?(fk_type) && STRING_TYPES.include?(pk_type))
+        
+        false
+      end
+
+      def likely_uuid_column?(foreign_key_column, primary_key_column)
+        # Check if string columns are likely to be UUIDs based on common patterns
+        # This helps when applications use string columns to store UUIDs
+        
+        # Check column limits (UUIDs are typically 36 characters with dashes, 32 without)
+        fk_limit = foreign_key_column.respond_to?(:limit) ? foreign_key_column.limit : nil
+        pk_limit = primary_key_column.respond_to?(:limit) ? primary_key_column.limit : nil
+        
+        # Common UUID string lengths
+        uuid_lengths = [32, 36]
+        
+        # If both columns have limits that match UUID lengths, likely UUIDs
+        return true if fk_limit && pk_limit && 
+                      uuid_lengths.include?(fk_limit) && uuid_lengths.include?(pk_limit)
+        
+        # Check column names for UUID patterns
+        uuid_name_patterns = %w[uuid guid]
+        fk_name_lower = foreign_key_column.name.downcase
+        pk_name_lower = primary_key_column.name.downcase
+        
+        uuid_name_patterns.any? do |pattern|
+          fk_name_lower.include?(pattern) || pk_name_lower.include?(pattern)
+        end
+      end
+
+      def check_table_primary_key(table_name, foreign_key_column)
+        # Fallback method when model class is not available
+        # Check if the table has an 'id' column with compatible type
+        begin
+          connection = ActiveRecord::Base.connection
+          primary_key_name = connection.primary_key(table_name)
+          
+          return false unless primary_key_name
+          
+          table_columns = connection.columns(table_name)
+          primary_key_column = table_columns.find { |col| col.name == primary_key_name }
+          
+          return false unless primary_key_column
+          
+          compatible_types?(foreign_key_column, primary_key_column)
+        rescue
+          # If there's any error accessing the table structure, be conservative and return false
+          false
+        end
       end
     end
   end
