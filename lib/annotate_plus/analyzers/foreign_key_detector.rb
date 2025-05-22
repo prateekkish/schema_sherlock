@@ -44,7 +44,10 @@ module AnnotatePlus
 
       def has_association_for_column?(column)
         association_name = column.name.gsub(/_id$/, '')
-        associations.any? { |assoc| assoc.name.to_s == association_name }
+        associations.any? do |assoc| 
+          assoc.name.to_s == association_name || 
+          assoc.foreign_key == column.name
+        end
       end
 
       def suggest_association_name(column)

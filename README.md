@@ -47,8 +47,6 @@ AnnotatePlus.configure do |config|
   config.suggest_indexes = true
   config.detect_unused_associations = true
   config.annotation_position = :top # or :bottom
-  config.exclude_models = ['ActiveRecord::Base']
-  config.min_usage_threshold = 3 # minimum usage count for suggestions
 end
 ```
 
@@ -68,7 +66,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/yourusername/annotate_plus.
+Bug reports and pull requests are welcome on GitHub at https://github.com/prateekkish/annotate_plus.
 
 ## License
 

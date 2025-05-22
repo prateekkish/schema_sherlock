@@ -19,11 +19,19 @@ module AnnotatePlus
         
         models.each do |model|
           puts "  Analyzing #{model.name}..."
-          results[model.name] = analyze_model(model)
+          analysis = analyze_model(model)
+          
+          # Only include models with issues in results
+          if has_issues?(analysis)
+            results[model.name] = analysis
+          end
         end
 
-        display_results(results)
+        display_results(results, models.length)
         save_results(results) if options[:output]
+      rescue AnnotatePlus::Error => e
+        say e.message, :red
+        exit 1
       end
 
       private
@@ -40,10 +48,27 @@ module AnnotatePlus
         analyzer.results
       end
 
-      def display_results(results)
+      def has_issues?(analysis)
+        foreign_key_analysis = analysis[:foreign_key_analysis]
+        missing = foreign_key_analysis[:missing_associations]
+        orphaned = foreign_key_analysis[:orphaned_foreign_keys]
+        
+        missing.any? || orphaned.any?
+      end
+
+      def display_results(results, total_models)
         puts "\n" + "="*50
         puts "Annotate Plus Analysis Report"
         puts "="*50
+        
+        puts "\nModels Analyzed: #{total_models}"
+        puts "Models with Issues: #{results.length}"
+        puts "Models without Issues: #{total_models - results.length}"
+
+        if results.empty?
+          puts "\n✓ No issues found in any models!"
+          return
+        end
 
         results.each do |model_name, analysis|
           puts "\n#{model_name}:"
@@ -62,10 +87,6 @@ module AnnotatePlus
             orphaned.each do |key|
               puts "    #{key[:column]} -> #{key[:issue]}"
             end
-          end
-
-          if missing.empty? && orphaned.empty?
-            puts "  No issues found"
           end
         end
       end
