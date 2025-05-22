@@ -29,12 +29,6 @@ annotate_plus analyze
 # Analyze specific model
 annotate_plus analyze User
 
-# Run analysis in interactive mode
-annotate_plus analyze User --interactive
-
-# Save analysis results to file
-annotate_plus analyze --output analysis_report.json
-
 # Override minimum usage threshold
 annotate_plus analyze --min-usage 1
 
@@ -50,12 +44,8 @@ Create a configuration file in your Rails application:
 ```ruby
 # config/initializers/annotate_plus.rb
 AnnotatePlus.configure do |config|
-  config.analyze_query_logs = true
-  config.suggest_indexes = true
-  config.detect_unused_associations = true
-  config.annotation_position = :top # or :bottom
-  config.exclude_models = ['ActiveRecord::Base']
-  config.min_usage_threshold = 3 # minimum usage count for suggestions
+  config.exclude_models = ['ActiveRecord::Base']  # Models to exclude from analysis
+  config.min_usage_threshold = 3  # Minimum usage count for foreign key suggestions
 end
 ```
 
@@ -66,8 +56,6 @@ end
 - **Codebase Analysis**: Scans your code to track foreign key usage patterns
 - **Configurable Thresholds**: Set minimum usage requirements for suggestions
 - **Rails Integration**: Works via CLI, rake tasks, or directly in models
-- **Performance Optimization**: Recommends indexes and caching strategies
-- **Interactive Mode**: Allows selective application of suggestions
 
 ## Development
 

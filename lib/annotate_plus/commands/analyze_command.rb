@@ -5,7 +5,6 @@ module AnnotatePlus
   module Commands
     class AnalyzeCommand < BaseCommand
       desc "analyze [MODEL]", "Analyze models for missing associations and optimization opportunities"
-      option :interactive, type: :boolean, default: false, desc: "Run in interactive mode"
       option :output, type: :string, desc: "Output file for analysis results"
       option :min_usage, type: :numeric, desc: "Minimum usage threshold for suggestions (overrides config)"
 

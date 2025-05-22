@@ -29,16 +29,24 @@ RSpec.describe AnnotatePlus::Analyzers::ForeignKeyDetector do
         allow(detector).to receive(:valid_foreign_key?).with(user_id_column).and_return(true)
         allow(detector).to receive(:valid_foreign_key?).with(category_id_column).and_return(true)
         allow(detector).to receive(:valid_foreign_key?).with(fake_id_column).and_return(false)
-        
+
         # Mock table existence
         allow(connection).to receive(:table_exists?).with("users").and_return(true)
         allow(connection).to receive(:table_exists?).with("categories").and_return(true)
         allow(connection).to receive(:table_exists?).with("fakes").and_return(false)
+        
+        # Mock usage tracker
+        allow(AnnotatePlus::UsageTracker).to receive(:track_foreign_key_usage)
+          .with(model_class)
+          .and_return({
+            "user_id" => 5,
+            "category_id" => 3
+          })
       end
 
       it "only includes valid foreign key columns" do
         detector.analyze
-        
+
         missing_associations = detector.results[:missing_associations]
         expect(missing_associations.map { |ma| ma[:column] }).to contain_exactly("user_id", "category_id")
         expect(missing_associations.map { |ma| ma[:column] }).not_to include("fake_id")
@@ -55,7 +63,7 @@ RSpec.describe AnnotatePlus::Analyzers::ForeignKeyDetector do
       before do
         allow(detector).to receive(:infer_table_name).with(user_id_column).and_return("users")
         allow(connection).to receive(:table_exists?).with("users").and_return(true)
-        
+
         # Mock the fallback path (let constantize fail and use direct table inspection)
         allow(connection).to receive(:primary_key).with("users").and_return("id")
         allow(connection).to receive(:columns).with("users").and_return([id_column])
