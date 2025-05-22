@@ -60,13 +60,15 @@ module AnnotatePlus
         puts "\n" + "="*50
         puts "Annotate Plus Analysis Report"
         puts "="*50
-        
-        puts "\nModels Analyzed: #{total_models}"
-        puts "Models with Issues: #{results.length}"
-        puts "Models without Issues: #{total_models - results.length}"
 
         if results.empty?
           puts "\n✓ No issues found in any models!"
+          puts "\n" + "="*50
+          puts "SUMMARY"
+          puts "="*50
+          puts "Models Analyzed: #{total_models}"
+          puts "Models with Issues: 0"
+          puts "Models without Issues: #{total_models}"
           return
         end
 
@@ -89,6 +91,13 @@ module AnnotatePlus
             end
           end
         end
+
+        puts "\n" + "="*50
+        puts "SUMMARY"
+        puts "="*50
+        puts "Models Analyzed: #{total_models}"
+        puts "Models with Issues: #{results.length}"
+        puts "Models without Issues: #{total_models - results.length}"
       end
 
       def save_results(results)
