@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/annotate_plus"
+require_relative "../lib/annotate_plus/commands/analyze_command"
+
+AnnotatePlus::Commands::AnalyzeCommand.start(ARGV)
