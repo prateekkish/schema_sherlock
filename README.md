@@ -1,4 +1,4 @@
-# AnnotatePlus
+# SchemaSherlock
 
 Intelligent Rails model analysis and annotation tool that extends beyond traditional schema annotation to provide intelligent analysis and actionable suggestions for Rails model code quality, performance, and maintainability.
 
@@ -7,7 +7,7 @@ Intelligent Rails model analysis and annotation tool that extends beyond traditi
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'annotate_plus', group: :development
+gem 'schema_sherlock', group: :development
 ```
 
 And then execute:
@@ -16,7 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install annotate_plus
+    $ gem install schema_sherlock
 
 ## Usage
 
@@ -24,17 +24,17 @@ Or install it yourself as:
 
 ```bash
 # Analyze all models
-annotate_plus analyze
+schema_sherlock analyze
 
 # Analyze specific model
-annotate_plus analyze User
+schema_sherlock analyze User
 
 # Override minimum usage threshold
-annotate_plus analyze --min-usage 1
+schema_sherlock analyze --min-usage 1
 
 # Use rake tasks instead
-rake annotate_plus:analyze
-rake annotate_plus:analyze_model[User]
+rake schema_sherlock:analyze
+rake schema_sherlock:analyze_model[User]
 ```
 
 ### Configuration
@@ -42,8 +42,8 @@ rake annotate_plus:analyze_model[User]
 Create a configuration file in your Rails application:
 
 ```ruby
-# config/initializers/annotate_plus.rb
-AnnotatePlus.configure do |config|
+# config/initializers/schema_sherlock.rb
+SchemaSherlock.configure do |config|
   config.exclude_models = ['ActiveRecord::Base']  # Models to exclude from analysis
   config.min_usage_threshold = 3  # Minimum usage count for foreign key suggestions
 end
@@ -65,7 +65,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/prateekkish/annotate_plus.
+Bug reports and pull requests are welcome on GitHub at https://github.com/prateekkish/schema_sherlock.
 
 ## License
 

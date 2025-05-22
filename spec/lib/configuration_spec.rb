@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe AnnotatePlus::Configuration do
+RSpec.describe SchemaSherlock::Configuration do
   let(:config) { described_class.new }
 
   describe "#initialize" do

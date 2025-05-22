@@ -1,7 +1,7 @@
 require "thor"
 require_relative "../model_loader"
 
-module AnnotatePlus
+module SchemaSherlock
   module Commands
     class BaseCommand < Thor
       protected
@@ -13,11 +13,11 @@ module AnnotatePlus
           if File.exist?(config_path)
             require config_path
           else
-            raise AnnotatePlus::Error, "Rails environment not found. Make sure you're running this from a Rails application root."
+            raise SchemaSherlock::Error, "Rails environment not found. Make sure you're running this from a Rails application root."
           end
         end
       rescue LoadError => e
-        raise AnnotatePlus::Error, "Could not load Rails environment: #{e.message}"
+        raise SchemaSherlock::Error, "Could not load Rails environment: #{e.message}"
       end
 
       def all_models

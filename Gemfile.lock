@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    annotate_plus (0.1.0)
+    schema_sherlock (0.1.0)
       activerecord (>= 6.0)
       rails (>= 6.0)
       thor (~> 1.0)
@@ -227,9 +227,9 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  annotate_plus!
   rake (~> 13.0)
   rspec (~> 3.0)
+  schema_sherlock!
 
 BUNDLED WITH
    2.6.3

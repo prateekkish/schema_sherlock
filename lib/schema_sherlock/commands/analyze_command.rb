@@ -1,7 +1,7 @@
 require_relative "base_command"
 require_relative "../analyzers/foreign_key_detector"
 
-module AnnotatePlus
+module SchemaSherlock
   module Commands
     class AnalyzeCommand < BaseCommand
       desc "analyze [MODEL]", "Analyze models for missing associations and optimization opportunities"
@@ -13,8 +13,8 @@ module AnnotatePlus
 
         # Override configuration if min_usage option provided
         if options[:min_usage]
-          original_threshold = AnnotatePlus.configuration.min_usage_threshold
-          AnnotatePlus.configuration.min_usage_threshold = options[:min_usage]
+          original_threshold = SchemaSherlock.configuration.min_usage_threshold
+          SchemaSherlock.configuration.min_usage_threshold = options[:min_usage]
         end
 
         models = model_name ? [find_model(model_name)] : all_models
@@ -35,13 +35,13 @@ module AnnotatePlus
 
         display_results(results, models.length)
         save_results(results) if options[:output]
-      rescue AnnotatePlus::Error => e
+      rescue SchemaSherlock::Error => e
         say e.message, :red
         exit 1
       ensure
         # Restore original threshold if it was overridden
         if options[:min_usage] && defined?(original_threshold)
-          AnnotatePlus.configuration.min_usage_threshold = original_threshold
+          SchemaSherlock.configuration.min_usage_threshold = original_threshold
         end
       end
 
@@ -54,7 +54,7 @@ module AnnotatePlus
       end
 
       def run_foreign_key_analysis(model)
-        analyzer = AnnotatePlus::Analyzers::ForeignKeyDetector.new(model)
+        analyzer = SchemaSherlock::Analyzers::ForeignKeyDetector.new(model)
         analyzer.analyze
         analyzer.results
       end
@@ -69,7 +69,7 @@ module AnnotatePlus
 
       def display_results(results, total_models)
         puts "\n" + "="*50
-        puts "Annotate Plus Analysis Report"
+        puts "Schema Sherlock Investigation Report"
         puts "="*50
 
         results.each do |model_name, analysis|
@@ -99,7 +99,7 @@ module AnnotatePlus
         puts "Models Analyzed: #{total_models}"
         puts "Models with Issues: #{results.length}"
         puts "Models without Issues: #{total_models - results.length}"
-        puts "Usage Threshold: #{AnnotatePlus.configuration.min_usage_threshold} occurrences"
+        puts "Usage Threshold: #{SchemaSherlock.configuration.min_usage_threshold} occurrences"
       end
 
       def save_results(results)

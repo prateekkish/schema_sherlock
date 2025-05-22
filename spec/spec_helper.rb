@@ -1,4 +1,4 @@
-require "annotate_plus"
+require "schema_sherlock"
 require "active_record"
 
 RSpec.configure do |config|

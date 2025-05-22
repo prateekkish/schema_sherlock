@@ -1,8 +1,8 @@
-module AnnotatePlus
+module SchemaSherlock
   class UsageTracker
     class << self
       def track_foreign_key_usage(model_class)
-        return {} unless AnnotatePlus.configuration.min_usage_threshold
+        return {} unless SchemaSherlock.configuration.min_usage_threshold
 
         scan_codebase_for_usage(model_class)
       end

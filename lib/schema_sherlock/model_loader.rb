@@ -1,4 +1,4 @@
-module AnnotatePlus
+module SchemaSherlock
   module ModelLoader
     class << self
       def all_models
@@ -16,15 +16,15 @@ module AnnotatePlus
         klass = name.safe_constantize || name.camelize.safe_constantize
 
         unless klass
-          raise AnnotatePlus::Error, "Could not find model: #{name}"
+          raise SchemaSherlock::Error, "Could not find model: #{name}"
         end
 
         unless klass < ActiveRecord::Base
-          raise AnnotatePlus::Error, "#{name} is not an ActiveRecord model"
+          raise SchemaSherlock::Error, "#{name} is not an ActiveRecord model"
         end
 
         unless klass.table_exists?
-          raise AnnotatePlus::Error, "Table for #{name} does not exist"
+          raise SchemaSherlock::Error, "Table for #{name} does not exist"
         end
 
         klass
@@ -34,7 +34,7 @@ module AnnotatePlus
 
       def ensure_rails_loaded!
         unless defined?(Rails) && Rails.application
-          raise AnnotatePlus::Error, "Rails application not loaded"
+          raise SchemaSherlock::Error, "Rails application not loaded"
         end
       end
 
@@ -69,7 +69,7 @@ module AnnotatePlus
       end
 
       def excluded_model?(klass)
-        AnnotatePlus.configuration.exclude_models.include?(klass.name)
+        SchemaSherlock.configuration.exclude_models.include?(klass.name)
       end
     end
   end

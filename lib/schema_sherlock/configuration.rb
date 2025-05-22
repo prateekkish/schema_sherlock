@@ -1,4 +1,4 @@
-module AnnotatePlus
+module SchemaSherlock
   class Configuration
     attr_accessor :exclude_models,
                   :min_usage_threshold

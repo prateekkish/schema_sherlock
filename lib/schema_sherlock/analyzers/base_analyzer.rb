@@ -1,4 +1,4 @@
-module AnnotatePlus
+module SchemaSherlock
   module Analyzers
     class BaseAnalyzer
       attr_reader :model_class, :results

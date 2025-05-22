@@ -1,7 +1,7 @@
 require_relative "base_analyzer"
 require_relative "../usage_tracker"
 
-module AnnotatePlus
+module SchemaSherlock
   module Analyzers
     class ForeignKeyDetector < BaseAnalyzer
       # Common integer types that can reference each other
@@ -23,7 +23,7 @@ module AnnotatePlus
 
       def find_missing_associations
         usage_stats = get_usage_stats
-        min_threshold = AnnotatePlus.configuration.min_usage_threshold
+        min_threshold = SchemaSherlock.configuration.min_usage_threshold
 
         foreign_key_columns.reject do |column|
           has_association_for_column?(column)

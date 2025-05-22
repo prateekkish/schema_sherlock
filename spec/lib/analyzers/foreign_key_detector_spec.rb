@@ -1,7 +1,7 @@
 require "spec_helper"
-require_relative "../../../lib/annotate_plus/analyzers/foreign_key_detector"
+require_relative "../../../lib/schema_sherlock/analyzers/foreign_key_detector"
 
-RSpec.describe AnnotatePlus::Analyzers::ForeignKeyDetector do
+RSpec.describe SchemaSherlock::Analyzers::ForeignKeyDetector do
   let(:model_class) { double("ModelClass") }
   let(:detector) { described_class.new(model_class) }
   let(:connection) { double("ActiveRecord::Connection") }
@@ -36,7 +36,7 @@ RSpec.describe AnnotatePlus::Analyzers::ForeignKeyDetector do
         allow(connection).to receive(:table_exists?).with("fakes").and_return(false)
         
         # Mock usage tracker
-        allow(AnnotatePlus::UsageTracker).to receive(:track_foreign_key_usage)
+        allow(SchemaSherlock::UsageTracker).to receive(:track_foreign_key_usage)
           .with(model_class)
           .and_return({
             "user_id" => 5,

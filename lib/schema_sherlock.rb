@@ -1,8 +1,8 @@
-require_relative "annotate_plus/version"
-require_relative "annotate_plus/configuration"
-require_relative "annotate_plus/railtie" if defined?(Rails)
+require_relative "schema_sherlock/version"
+require_relative "schema_sherlock/configuration"
+require_relative "schema_sherlock/railtie" if defined?(Rails)
 
-module AnnotatePlus
+module SchemaSherlock
   class Error < StandardError; end
 
   def self.configure
