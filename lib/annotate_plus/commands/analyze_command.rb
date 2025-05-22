@@ -7,20 +7,27 @@ module AnnotatePlus
       desc "analyze [MODEL]", "Analyze models for missing associations and optimization opportunities"
       option :interactive, type: :boolean, default: false, desc: "Run in interactive mode"
       option :output, type: :string, desc: "Output file for analysis results"
+      option :min_usage, type: :numeric, desc: "Minimum usage threshold for suggestions (overrides config)"
 
       def analyze(model_name = nil)
         load_rails_environment
 
+        # Override configuration if min_usage option provided
+        if options[:min_usage]
+          original_threshold = AnnotatePlus.configuration.min_usage_threshold
+          AnnotatePlus.configuration.min_usage_threshold = options[:min_usage]
+        end
+
         models = model_name ? [find_model(model_name)] : all_models
-        
+
         puts "Analyzing #{models.length} model(s)..."
-        
+
         results = {}
-        
+
         models.each do |model|
           puts "  Analyzing #{model.name}..."
           analysis = analyze_model(model)
-          
+
           # Only include models with issues in results
           if has_issues?(analysis)
             results[model.name] = analysis
@@ -32,6 +39,11 @@ module AnnotatePlus
       rescue AnnotatePlus::Error => e
         say e.message, :red
         exit 1
+      ensure
+        # Restore original threshold if it was overridden
+        if options[:min_usage] && defined?(original_threshold)
+          AnnotatePlus.configuration.min_usage_threshold = original_threshold
+        end
       end
 
       private
@@ -52,7 +64,7 @@ module AnnotatePlus
         foreign_key_analysis = analysis[:foreign_key_analysis]
         missing = foreign_key_analysis[:missing_associations]
         orphaned = foreign_key_analysis[:orphaned_foreign_keys]
-        
+
         missing.any? || orphaned.any?
       end
 
@@ -61,25 +73,15 @@ module AnnotatePlus
         puts "Annotate Plus Analysis Report"
         puts "="*50
 
-        if results.empty?
-          puts "\n✓ No issues found in any models!"
-          puts "\n" + "="*50
-          puts "SUMMARY"
-          puts "="*50
-          puts "Models Analyzed: #{total_models}"
-          puts "Models with Issues: 0"
-          puts "Models without Issues: #{total_models}"
-          return
-        end
-
         results.each do |model_name, analysis|
           puts "\n#{model_name}:"
-          
+
           missing = analysis[:foreign_key_analysis][:missing_associations]
           if missing.any?
             puts "  Missing Associations:"
             missing.each do |assoc|
-              puts "    belongs_to :#{assoc[:suggested_association]} # #{assoc[:column]} foreign key exists"
+              usage_info = assoc[:usage_count] ? " (used #{assoc[:usage_count]} times)" : ""
+              puts "    belongs_to :#{assoc[:suggested_association]} # #{assoc[:column]} foreign key exists#{usage_info}"
             end
           end
 
@@ -98,6 +100,7 @@ module AnnotatePlus
         puts "Models Analyzed: #{total_models}"
         puts "Models with Issues: #{results.length}"
         puts "Models without Issues: #{total_models - results.length}"
+        puts "Usage Threshold: #{AnnotatePlus.configuration.min_usage_threshold} occurrences"
       end
 
       def save_results(results)

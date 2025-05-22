@@ -34,6 +34,13 @@ annotate_plus analyze User --interactive
 
 # Save analysis results to file
 annotate_plus analyze --output analysis_report.json
+
+# Override minimum usage threshold
+annotate_plus analyze --min-usage 1
+
+# Use rake tasks instead
+rake annotate_plus:analyze
+rake annotate_plus:analyze_model[User]
 ```
 
 ### Configuration
@@ -47,15 +54,19 @@ AnnotatePlus.configure do |config|
   config.suggest_indexes = true
   config.detect_unused_associations = true
   config.annotation_position = :top # or :bottom
+  config.exclude_models = ['ActiveRecord::Base']
+  config.min_usage_threshold = 3 # minimum usage count for suggestions
 end
 ```
 
 ## Features
 
 - **Smart Association Detection**: Identifies missing associations based on foreign keys
-- **Query Pattern Analysis**: Suggests associations based on code usage patterns
+- **Usage-Based Filtering**: Only suggests associations for frequently used foreign keys
+- **Codebase Analysis**: Scans your code to track foreign key usage patterns
+- **Configurable Thresholds**: Set minimum usage requirements for suggestions
+- **Rails Integration**: Works via CLI, rake tasks, or directly in models
 - **Performance Optimization**: Recommends indexes and caching strategies
-- **Dead Code Detection**: Finds unused associations and callbacks
 - **Interactive Mode**: Allows selective application of suggestions
 
 ## Development
