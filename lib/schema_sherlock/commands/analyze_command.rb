@@ -1,6 +1,7 @@
 require_relative "base_command"
 require_relative "../analyzers/foreign_key_detector"
 require_relative "../analyzers/index_recommendation_detector"
+require_relative "../schema_cache"
 
 module SchemaSherlock
   module Commands
@@ -21,6 +22,11 @@ module SchemaSherlock
         models = model_name ? [find_model(model_name)] : all_models
 
         puts "Analyzing #{models.length} model(s)..."
+        
+        # Preload metadata cache for performance
+        puts "Preloading database metadata..."
+        cache_stats = SchemaCache.preload_all_metadata
+        puts "  Cached: #{cache_stats[:tables_cached]} tables, #{cache_stats[:columns_cached]} column sets, #{cache_stats[:indexes_cached]} index sets"
 
         results = {}
 
@@ -40,6 +46,9 @@ module SchemaSherlock
         say e.message, :red
         exit 1
       ensure
+        # Clear cache to free memory
+        SchemaCache.clear_cache
+        
         # Restore original threshold if it was overridden
         if options[:min_usage] && defined?(original_threshold)
           SchemaSherlock.configuration.min_usage_threshold = original_threshold

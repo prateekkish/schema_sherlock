@@ -1,4 +1,5 @@
 require_relative "base_analyzer"
+require_relative "../schema_cache"
 
 module SchemaSherlock
   module Analyzers
@@ -36,7 +37,7 @@ module SchemaSherlock
       end
 
       def existing_indexes
-        @existing_indexes ||= ActiveRecord::Base.connection.indexes(table_name)
+        @existing_indexes ||= SchemaCache.indexes(table_name)
       end
     end
   end

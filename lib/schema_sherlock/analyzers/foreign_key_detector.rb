@@ -1,5 +1,6 @@
 require_relative "base_analyzer"
 require_relative "../usage_tracker"
+require_relative "../schema_cache"
 
 module SchemaSherlock
   module Analyzers
@@ -77,7 +78,7 @@ module SchemaSherlock
       end
 
       def table_exists?(table_name)
-        ActiveRecord::Base.connection.table_exists?(table_name)
+        SchemaCache.table_exists?(table_name)
       end
 
       def valid_foreign_key?(column)
@@ -156,12 +157,11 @@ module SchemaSherlock
         # Check if the table has an 'id' column with compatible type
         begin
           connection = ActiveRecord::Base.connection
-          primary_key_name = connection.primary_key(table_name)
+          primary_key_name = SchemaCache.primary_key(table_name)
 
           return false unless primary_key_name
 
-          table_columns = connection.columns(table_name)
-          primary_key_column = table_columns.find { |col| col.name == primary_key_name }
+          primary_key_column = SchemaCache.column(table_name, primary_key_name)
 
           return false unless primary_key_column
 
