@@ -27,6 +27,7 @@ RSpec.describe SchemaSherlock::Analyzers::IndexRecommendationDetector do
     let(:existing_indexes) { [] }
     before do
       allow(mock_model_class).to receive(:columns).and_return(columns)
+      allow(mock_connection).to receive(:table_exists?).with('posts').and_return(true)
       allow(mock_connection).to receive(:indexes).with('posts').and_return(existing_indexes)
     end
 
@@ -128,6 +129,7 @@ RSpec.describe SchemaSherlock::Analyzers::IndexRecommendationDetector do
       end
 
       before do
+        allow(mock_connection).to receive(:table_exists?).with('posts').and_return(true)
         allow(mock_connection).to receive(:indexes).with('posts').and_return(existing_indexes)
       end
 

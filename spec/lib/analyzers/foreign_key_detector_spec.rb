@@ -188,6 +188,7 @@ RSpec.describe SchemaSherlock::Analyzers::ForeignKeyDetector do
 
     context "when table has compatible primary key" do
       before do
+        allow(connection).to receive(:table_exists?).with("users").and_return(true)
         allow(connection).to receive(:primary_key).with("users").and_return("id")
         allow(connection).to receive(:columns).with("users").and_return([id_column])
         allow(detector).to receive(:compatible_types?).with(user_id_column, id_column).and_return(true)
@@ -200,6 +201,7 @@ RSpec.describe SchemaSherlock::Analyzers::ForeignKeyDetector do
 
     context "when table has no primary key" do
       before do
+        allow(connection).to receive(:table_exists?).with("users").and_return(true)
         allow(connection).to receive(:primary_key).with("users").and_return(nil)
       end
 
@@ -210,6 +212,7 @@ RSpec.describe SchemaSherlock::Analyzers::ForeignKeyDetector do
 
     context "when there's an error accessing table structure" do
       before do
+        allow(connection).to receive(:table_exists?).with("users").and_return(true)
         allow(connection).to receive(:primary_key).with("users").and_raise(StandardError.new("Table error"))
       end
 

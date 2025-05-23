@@ -6,7 +6,6 @@ module SchemaSherlock
         @columns_cache = {}
         @indexes_cache = {}
         @primary_keys_cache = {}
-        @connection = ActiveRecord::Base.connection
       end
 
       def clear_cache
@@ -16,18 +15,22 @@ module SchemaSherlock
         @primary_keys_cache&.clear
       end
 
+      def connection
+        ActiveRecord::Base.connection
+      end
+
       def preload_all_metadata
         initialize_cache if @table_exists_cache.nil?
         
         # Preload all tables existence
-        all_tables = @connection.tables
+        all_tables = connection.tables
         all_tables.each { |table| @table_exists_cache[table] = true }
         
         # Preload columns, indexes, and primary keys for all tables
         all_tables.each do |table|
-          @columns_cache[table] = @connection.columns(table)
-          @indexes_cache[table] = @connection.indexes(table)
-          @primary_keys_cache[table] = @connection.primary_key(table)
+          @columns_cache[table] = connection.columns(table)
+          @indexes_cache[table] = connection.indexes(table)
+          @primary_keys_cache[table] = connection.primary_key(table)
         end
         
         # Return stats for debugging
@@ -46,7 +49,7 @@ module SchemaSherlock
         return @table_exists_cache[table_name] if @table_exists_cache.key?(table_name)
         
         # If not in cache, check database and cache result
-        exists = @connection.table_exists?(table_name)
+        exists = connection.table_exists?(table_name)
         @table_exists_cache[table_name] = exists
         exists
       end
@@ -60,7 +63,7 @@ module SchemaSherlock
         # If not in cache, fetch from database and cache result
         return nil unless table_exists?(table_name)
         
-        columns = @connection.columns(table_name)
+        columns = connection.columns(table_name)
         @columns_cache[table_name] = columns
         columns
       end
@@ -74,7 +77,7 @@ module SchemaSherlock
         # If not in cache, fetch from database and cache result
         return [] unless table_exists?(table_name)
         
-        indexes = @connection.indexes(table_name)
+        indexes = connection.indexes(table_name)
         @indexes_cache[table_name] = indexes
         indexes
       end
@@ -88,7 +91,7 @@ module SchemaSherlock
         # If not in cache, fetch from database and cache result
         return nil unless table_exists?(table_name)
         
-        primary_key = @connection.primary_key(table_name)
+        primary_key = connection.primary_key(table_name)
         @primary_keys_cache[table_name] = primary_key
         primary_key
       end

@@ -156,7 +156,6 @@ module SchemaSherlock
         # Fallback method when model class is not available
         # Check if the table has an 'id' column with compatible type
         begin
-          connection = ActiveRecord::Base.connection
           primary_key_name = SchemaCache.primary_key(table_name)
 
           return false unless primary_key_name
