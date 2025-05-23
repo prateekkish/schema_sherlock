@@ -1,5 +1,7 @@
 # SchemaSherlock
 
+[![Gem Version](https://badge.fury.io/rb/schema_sherlock.svg?icon=si%3Arubygems)](https://badge.fury.io/rb/schema_sherlock)
+
 Intelligent Rails model analysis and annotation tool that extends beyond traditional schema annotation to provide intelligent analysis and actionable suggestions for Rails model code quality, performance, and maintainability.
 
 ## Installation
