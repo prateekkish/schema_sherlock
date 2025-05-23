@@ -1,5 +1,6 @@
 require_relative "base_command"
 require_relative "../analyzers/foreign_key_detector"
+require_relative "../analyzers/index_recommendation_detector"
 
 module SchemaSherlock
   module Commands
@@ -49,7 +50,8 @@ module SchemaSherlock
 
       def analyze_model(model)
         {
-          foreign_key_analysis: run_foreign_key_analysis(model)
+          foreign_key_analysis: run_foreign_key_analysis(model),
+          index_analysis: run_index_analysis(model)
         }
       end
 
@@ -59,12 +61,21 @@ module SchemaSherlock
         analyzer.results
       end
 
+      def run_index_analysis(model)
+        analyzer = SchemaSherlock::Analyzers::IndexRecommendationDetector.new(model)
+        analyzer.analyze
+        analyzer.results
+      end
+
       def has_issues?(analysis)
         foreign_key_analysis = analysis[:foreign_key_analysis]
         missing = foreign_key_analysis[:missing_associations]
         orphaned = foreign_key_analysis[:orphaned_foreign_keys]
 
-        missing.any? || orphaned.any?
+        index_analysis = analysis[:index_analysis]
+        missing_indexes = index_analysis[:missing_foreign_key_indexes]
+
+        missing.any? || orphaned.any? || missing_indexes.any?
       end
 
       def display_results(results, total_models)
@@ -89,6 +100,14 @@ module SchemaSherlock
             puts "  Orphaned Foreign Keys:"
             orphaned.each do |key|
               puts "    #{key[:column]} -> #{key[:issue]}"
+            end
+          end
+
+          missing_indexes = analysis[:index_analysis][:missing_foreign_key_indexes]
+          if missing_indexes.any?
+            puts "  Missing Indexes:"
+            missing_indexes.each do |idx|
+              puts "    #{idx[:migration]} # #{idx[:reason]}"
             end
           end
         end
