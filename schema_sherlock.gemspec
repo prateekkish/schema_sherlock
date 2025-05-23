@@ -30,6 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rails", ">= 6.0"
   spec.add_dependency "thor", "~> 1.0"
   spec.add_dependency "activerecord", ">= 6.0"
+  spec.add_dependency "concurrent-ruby", "~> 1.0"
+  spec.add_dependency "msgpack", "~> 1.0"
 
   # Development dependencies
   spec.add_development_dependency "rspec", "~> 3.0"

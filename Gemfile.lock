@@ -3,6 +3,8 @@ PATH
   specs:
     schema_sherlock (0.1.0)
       activerecord (>= 6.0)
+      concurrent-ruby (~> 1.0)
+      msgpack (~> 1.0)
       rails (>= 6.0)
       thor (~> 1.0)
 
@@ -113,6 +115,7 @@ GEM
     marcel (1.0.4)
     mini_mime (1.1.5)
     minitest (5.25.5)
+    msgpack (1.8.0)
     net-imap (0.5.8)
       date
       net-protocol

@@ -2,6 +2,8 @@ require_relative "base_command"
 require_relative "../analyzers/foreign_key_detector"
 require_relative "../analyzers/index_recommendation_detector"
 require_relative "../schema_cache"
+require_relative "../file_cache"
+require_relative "../binary_index"
 
 module SchemaSherlock
   module Commands
@@ -9,6 +11,7 @@ module SchemaSherlock
       desc "analyze [MODEL]", "Analyze models for missing associations and optimization opportunities"
       option :output, type: :string, desc: "Output file for analysis results"
       option :min_usage, type: :numeric, desc: "Minimum usage threshold for suggestions (overrides config)"
+      option :use_index, type: :boolean, default: true, desc: "Use binary index for faster analysis (if available)"
 
       def analyze(model_name = nil)
         load_rails_environment
@@ -23,15 +26,40 @@ module SchemaSherlock
 
         puts "Analyzing #{models.length} model(s)..."
         
+        # Try to load binary index for faster analysis
+        @binary_index = nil
+        if options[:use_index] && defined?(Rails) && Rails.root
+          puts "Loading binary index..."
+          @binary_index = BinaryIndex.load_or_build(Rails.root.to_s)
+          if @binary_index
+            puts "  Index loaded with #{@binary_index[:files].size} files indexed"
+          end
+        end
+        
         # Preload metadata cache for performance
         puts "Preloading database metadata..."
         cache_stats = SchemaCache.preload_all_metadata
         puts "  Cached: #{cache_stats[:tables_cached]} tables, #{cache_stats[:columns_cached]} column sets, #{cache_stats[:indexes_cached]} index sets"
+        
+        # Preload file cache for performance (only if usage tracking is enabled and no index available)
+        if SchemaSherlock.configuration.min_usage_threshold && SchemaSherlock.configuration.min_usage_threshold > 0
+          if @binary_index
+            puts "Using binary index for file analysis (skipping file cache preload)"
+          else
+            puts "Preloading file cache..."
+            file_stats = FileCache.preload_all_files
+            puts "  Cached: #{file_stats[:files_scanned]} files (#{(file_stats[:total_size] / 1024.0 / 1024.0).round(2)} MB), #{file_stats[:files_failed]} failed"
+          end
+        end
 
         results = {}
 
         models.each do |model|
           puts "  Analyzing #{model.name}..."
+          
+          # Set binary index for usage tracker
+          UsageTracker.binary_index = @binary_index
+          
           analysis = analyze_model(model)
 
           # Only include models with issues in results
@@ -46,8 +74,9 @@ module SchemaSherlock
         say e.message, :red
         exit 1
       ensure
-        # Clear cache to free memory
+        # Clear caches to free memory
         SchemaCache.clear_cache
+        FileCache.clear_cache
         
         # Restore original threshold if it was overridden
         if options[:min_usage] && defined?(original_threshold)
