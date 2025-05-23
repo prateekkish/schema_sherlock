@@ -17,3 +17,12 @@
 - Provides detailed analysis reports
 - Supports complex foreign key types (integer, bigint, UUID, string)
 - Smart table and model inference
+
+## [0.1.1] - 2025-01-24
+
+### Features
+- Adds recommendations for missing indices for foreign keys
+
+### Bugs and improvements
+- Make analysis 80% fast
+- Safe load models to avoid break constraint errors

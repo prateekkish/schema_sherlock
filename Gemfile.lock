@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    schema_sherlock (0.1.0)
+    schema_sherlock (0.1.1)
       activerecord (>= 6.0)
       concurrent-ruby (~> 1.0)
       msgpack (~> 1.0)
